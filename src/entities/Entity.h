@@ -3,10 +3,29 @@
 
 class Entity{
 protected:
+    enum class Direction{
+        DOWN,
+        TOP,
+        LEFT,
+        RIGHT
+    };
+
+    static constexpr float SPRITE_WIDTH = 32.0f;
+    static constexpr float ANIMATION_LENGTH = 0.15f;
+    static constexpr int NUM_FRAMES = 4;
+
     Vector2 coords;
     float width, height;
     Texture2D *sprite;
     float maxSpeed;
+
+    int currentFrame = 1;
+    float frameTimer = 0.0f;
+    Direction currentDirection = Direction::DOWN;
+    Rectangle spriteSource;
+
+    Direction findCurrentDirection(Vector2 adjust);
+    void updateAnimation();
 
 public:
     Entity();
@@ -19,6 +38,7 @@ public:
     const float getHeight() const;
     Texture2D *getSprite();
     const float getMaxSpeed() const;
+    virtual Rectangle getSpriteSource();
 
     void setCoords(Vector2 coords);
     void setWidth(float width);
