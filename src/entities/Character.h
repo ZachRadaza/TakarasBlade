@@ -1,7 +1,7 @@
 #pragma once
 #include "./Entity.h"
 #include "../engine/Visual.h"
-#include "../engine/Action.h"
+#include "../engine/Enums.h"
 #include <cmath>
 
 
@@ -68,10 +68,12 @@ public:
     void dash(Vector2 adjust);
     const bool isDashing() const;
     const bool getHitsDash() const;
+    const float getDashCooldown();
     void setHitsDash(bool hitDash);
 
     void parry();
     const bool isParrying() const;
+    const float getParryCooldown();
 
     void stun();
     const bool isStunned() const;

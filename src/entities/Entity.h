@@ -1,15 +1,9 @@
 #pragma once
 #include "raylib.h"
+#include "../engine/Enums.h"
 
 class Entity{
 protected:
-    enum class Direction{
-        DOWN,
-        TOP,
-        LEFT,
-        RIGHT
-    };
-
     static constexpr float SPRITE_WIDTH = 32.0f;
     static constexpr float ANIMATION_LENGTH = 0.15f;
     static constexpr int NUM_FRAMES = 4;
@@ -21,6 +15,7 @@ protected:
 
     int currentFrame = 1;
     float frameTimer = 0.0f;
+    bool animatedOnce = false;
     Direction currentDirection = Direction::DOWN;
     Rectangle spriteSource;
 
@@ -39,12 +34,15 @@ public:
     Texture2D *getSprite();
     const float getMaxSpeed() const;
     virtual Rectangle getSpriteSource();
+    const Direction getCurrentDirection();
+    const bool getAnimatedOnce();
 
     void setCoords(Vector2 coords);
     void setWidth(float width);
     void setHeight(float height);
     void setSprite(Texture2D *sprite);
     void setMaxSpeed(float maxSpeed);
+    void setCurrentDirection(Direction direction);
 
     void adjustCoords(Vector2 adjust);
 };

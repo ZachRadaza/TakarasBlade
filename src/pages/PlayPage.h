@@ -1,8 +1,11 @@
 #pragma once
 #include "Page.h"
 #include "../entities/Character.h"
-#include "../engine/Action.h"
+#include "../engine/Enums.h"
 #include <vector>
+#include <unordered_map>
+#include <cmath>
+#include <algorithm>
 
 class Play : public Page{
 private:
@@ -10,7 +13,7 @@ private:
     
     static constexpr float TAKARA_SPEED = 600.0f;
     static constexpr float TAKARA_ACCELARATION = 1500.0f;
-    static constexpr int TAKARA_HEALTH = 300;
+    static constexpr int TAKARA_HEALTH = 3;
     static constexpr float TAKARA_RADIUS = 250.0f;
 
     static constexpr float ENTITY_WIDTH = 128.0f;
@@ -27,38 +30,39 @@ private:
     static constexpr float ENEMIES_SPAWN_RATE = 1.0f;
     static constexpr float WAVE_BREAK = 4.0f;
 
-    float scaleSprites;
     Character player;
     std::vector<Character> enemies;
-    std::vector<Entity> objects;    
+    Entity uiElements[static_cast<int>(UI::COUNT)];
 
-    int wave = 1;
+    int wave = 0;
+    int kills = 0;
     int enemiesToSpawn = 0;
     float waveBreakTimer = 0.0f;
     float enemySpawnTimer = 0.0f;
 
+    void initUI();
+
     void handleInput() override;
-    void updatePlayer();
     bool dashInteraction(Character *charac1, Character *charac2);
 
-    void drawEntity(Entity *entity);
-    void drawObjects();
-    void drawEnemies();
+    void updateEnemyInteraction(Character &enemy);
+    void updateEnemyMovement(Character &enemy);
+    void updateEnemies();
+    void updateUI();
 
+    void drawEntity(Entity *entity);
+    void drawEnemies();
+    void drawBackground();
     void drawUI();
 
     bool collisionDetection(Entity *object1, Entity *object2);
-    bool checkCollisionObjects();
     bool circleDetection(Character *charac1, Character *charac2);
     
     bool areEnemiesDead();
     void spawnEnemyWave();
-    void updateEnemyInteraction(Character &enemy);
-    void updateEnemyMovement(Character &enemy);
-    void updateEnemies();
-
     void manageWave();
     
+    void restartGame();
 public:
     Play();
     Play(Audio *audioEngine, Visual *visualEngine);

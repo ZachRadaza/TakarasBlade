@@ -1,6 +1,6 @@
-# Takaras Blade (Name in the works)
+# Takaras Blade
 
-endless fighting game
+endless 2D fighting game made in C++ and raylib
 
 ---
 

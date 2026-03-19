@@ -44,6 +44,23 @@ const bool Character::getHitsDash() const { return this->hitsDash; }
 
 const Action Character::getCurrentAction(){ return this->currentAction; }
 
+const float Character::getDashCooldown(){
+    float cooldown = DASH_CD * -1;
+
+    if(isDashing() || dashTimer < cooldown)
+        return 0.0f;
+
+    return dashTimer / cooldown;
+}
+
+const float Character::getParryCooldown(){
+    float cooldown = PARRY_CD * -1;
+
+    if(isDashing() || parryTimer < cooldown)
+        return 0.0f;
+
+    return parryTimer / cooldown;   
+}
 
 // setters
 
@@ -94,11 +111,11 @@ Rectangle Character::getSpriteSource(){
 
     Action action = Action::RUN;
 
+    if(velocity.x == 0.0f && velocity.y == 0.0f) action = Action::STANCE;
+    
     if(isDashing()) action = Action::DASH;
 
     if(isStunned()) action = Action::STUN;
-
-    if(velocity.x == 0.0f && velocity.y == 0.0f) action = Action::STANCE;
 
     if(isParrying()) action = Action::PARRY;
     
@@ -110,7 +127,7 @@ Rectangle Character::getSpriteSource(){
 }
 
 void Character::dash(Vector2 adjust){
-    if(isStunned())
+    if(isStunned() || isDead())
         return;
 
     float dashCooldown = DASH_CD * -1.0f;
@@ -155,7 +172,7 @@ void Character::adjustCoords(Vector2 adjust, float friction){
     float downTime = GetFrameTime();
     float drop = friction * downTime;
 
-    if(isStunned())
+    if(isStunned() || isDead())
         adjust.x = adjust.y = 0;
 
     if(!isDashing())

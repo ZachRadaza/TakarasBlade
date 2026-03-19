@@ -7,18 +7,18 @@ Entity::Entity(Vector2 coords, float width, float height, Texture2D *sprite, flo
     : coords(coords), width(width), height(height), sprite(sprite), maxSpeed(maxSpeed) {}
 
 Entity &Entity::operator=(const Entity &other){
-    coords = other.coords;
-    width = other.width;
-    height = other.height;
-    sprite = other.sprite;
-    maxSpeed = other.maxSpeed;
+    this->coords = other.coords;
+    this->width = other.width;
+    this->height = other.height;
+    this->sprite = other.sprite;
+    this->maxSpeed = other.maxSpeed;
     return *this;
 }
 
 Entity::~Entity(){
 }
 
-Entity::Direction Entity::findCurrentDirection(Vector2 adjust){
+Direction Entity::findCurrentDirection(Vector2 adjust){
     Direction current = currentDirection;
 
     if(adjust.x > 0)
@@ -43,6 +43,7 @@ void Entity::updateAnimation(){
             ? currentFrame + 1
             : 0;
 
+        animatedOnce = true;
         frameTimer = ANIMATION_LENGTH;
     }
 }
@@ -70,6 +71,10 @@ Rectangle Entity::getSpriteSource(){
     return spriteSource;
 }
 
+const Direction Entity::getCurrentDirection(){ return this->currentDirection; }
+
+const bool Entity::getAnimatedOnce(){ return this->animatedOnce; }
+
 void Entity::setCoords(Vector2 coords){ this->coords = coords; }
 
 void Entity::setWidth(float width){ this->width = width; }
@@ -84,6 +89,8 @@ void Entity::setSprite(Texture2D *sprite){
 }
 
 void Entity::setMaxSpeed(float speed){ this->maxSpeed = speed; }
+
+void Entity::setCurrentDirection(Direction direction){ this->currentDirection = direction; }
 
 void Entity::adjustCoords(Vector2 adjust){
     float downTime = GetFrameTime();
