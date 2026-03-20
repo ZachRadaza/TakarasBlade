@@ -18,6 +18,9 @@ enum class Direction{
 };
 
 enum class Elements{
+    SMOKE,
+    SPARK,
+    BLOOD,
     COUNT
 };
 
@@ -28,5 +31,11 @@ enum class UI{
     HEALTH,
     DASH,
     PARRY,
+    COUNT
+};
+
+enum class PageType{
+    HOME,
+    PLAY,
     COUNT
 };

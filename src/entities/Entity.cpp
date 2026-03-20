@@ -39,11 +39,13 @@ void Entity::updateAnimation(){
     
     frameTimer -= downTime;
     if(frameTimer <= 0.0f){
-        currentFrame = currentFrame + 1 < NUM_FRAMES
-            ? currentFrame + 1
-            : 0;
+        currentFrame++;
 
-        animatedOnce = true;
+        if(currentFrame >= NUM_FRAMES){
+            currentFrame = 0;
+            animatedOnce = true;
+        }
+
         frameTimer = ANIMATION_LENGTH;
     }
 }

@@ -1,5 +1,4 @@
 #include "GameEngine.h"
-#include <iostream>
 
 void initializeWindow(float width, float height, const char *name){
     SetConfigFlags(FLAG_WINDOW_UNDECORATED);
@@ -18,21 +17,19 @@ GameEngine::GameEngine()
 
     visualEngine.initTextures();
 
-    pages[0] = new Home();
+    pages[static_cast<int>(PageType::HOME)] = new Home();
 
-    pages[1] = new Play();
+    pages[static_cast<int>(PageType::PLAY)] = new Play();
 
     for(int i = 0; i < 2; i++){
         pages[i]->setAudioEngine(&audioEngine);
         pages[i]->setVisualEngine(&visualEngine);
     }
 
-    currentPage = pages[1];
+    currentPage = pages[static_cast<int>(PageType::PLAY)];
 }
 
 GameEngine::~GameEngine(){
-    std::cout << "crash";
-
     for(Page *&page : pages){
         delete page;
     }
@@ -51,5 +48,15 @@ void GameEngine::gameLoop(){
         BeginDrawing();
         currentPage->draw();
         EndDrawing();
+
+        PageType pageType = currentPage->getSwitchPage();
+        if(pageType != PageType::COUNT)
+            openPage(pageType);
     }
+}
+
+void GameEngine::openPage(PageType page){
+    currentPage = pages[static_cast<int>(page)];
+
+    currentPage->resetPage();
 }

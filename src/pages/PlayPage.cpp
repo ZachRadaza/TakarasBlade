@@ -1,5 +1,4 @@
 #include "PlayPage.h"
-#include "raylib.h"
 
 Play::Play()
     : Page(), 
@@ -15,7 +14,9 @@ Play::Play()
         { 0.0f, 0.0f }
     ),
     enemies(),
-    uiElements()
+    bloodElements(),
+    elements(),
+    uiComponents()
 {}
 
 Play::Play(Audio *audioEngine, Visual *visualEngine)
@@ -32,7 +33,9 @@ Play::Play(Audio *audioEngine, Visual *visualEngine)
         { 0.0f, 0.0f }
     ),
     enemies(),
-    uiElements()
+    bloodElements(),
+    elements(),
+    uiComponents()
 {
     initUI();
 }
@@ -54,8 +57,8 @@ void Play::initUI(){
     coords[static_cast<int>(UI::WAVE)] = { 0.0f, ENTITY_HEIGHT };
     coords[static_cast<int>(UI::KILLS)] = { 0.0f, ENTITY_HEIGHT * 2 };
 
-    for(int i = 0; i < sizeof(uiElements) / sizeof(uiElements[0]); i++){
-        uiElements[i] = {
+    for(int i = 0; i < sizeof(uiComponents) / sizeof(uiComponents[0]); i++){
+        uiComponents[i] = {
             coords[i],
             ENTITY_WIDTH,
             ENTITY_HEIGHT,
@@ -68,6 +71,9 @@ void Play::initUI(){
 void Play::handleInput(){
     float x, y;
     x = y = 0;
+
+    if(IsKeyReleased(KEY_P))
+        switchPage = PageType::HOME;
 
     if(IsKeyPressed(KEY_R))
         restartGame();
@@ -110,6 +116,23 @@ bool Play::areEnemiesDead(){
     }
 
     return true;
+}
+
+void Play::addElement(Vector2 coords, Elements elementType){
+    Entity element(
+        coords,
+        ENTITY_WIDTH,
+        ENTITY_HEIGHT,
+        visualEngine->getElementSprite(static_cast<int>(elementType)),
+        0.0f
+    );
+
+    if(elementType == Elements::BLOOD){
+        element.setCurrentDirection(Direction::LEFT);
+
+        bloodElements.push_back(element);
+    } else
+        elements.push_back(element);
 }
 
 bool Play::collisionDetection(Entity *object1, Entity *object2){
@@ -157,6 +180,7 @@ void Play::spawnEnemyWave(){
         );
 
         enemies.push_back(enemy);
+        addElement(enemy.getCoords(), Elements::SMOKE);
     }
 
     enemiesToSpawn -= ENEMIES_PER_SPAWN;
@@ -183,6 +207,7 @@ void Play::manageWave(){
 
     waveBreakTimer = WAVE_BREAK;
     enemies.clear();
+    elements.clear();
     enemiesToSpawn = wave * BASE_NUM_ENEMIES;
 }
 
@@ -194,14 +219,20 @@ void Play::updateEnemyInteraction(Character &enemy){
     if(dashInteraction(&player, &enemy)){
         enemy.adjustHealth(-1);
         
-        if(enemy.isDead())
+        if(enemy.isDead()){
             kills++;
+            addElement(enemy.getCoords(), Elements::BLOOD);
+        }
     } else if(dashInteraction(&enemy, &player) && !enemy.getHitsDash()){ // enemy dashing to player
         if(player.isParrying()){
             enemy.stun();
-        } else {
+
+            addElement(player.getCoords(), Elements::SPARK);
+        } else if(!enemy.isStunned()){
             player.adjustHealth(-1);
             enemy.setHitsDash(true);
+
+            addElement(player.getCoords(), Elements::BLOOD);
         }
     }
 }
@@ -231,28 +262,48 @@ void Play::updateEnemyMovement(Character &enemy){
 
 void Play::updateEnemies(){
     for(Character &enemy: enemies){
-        updateEnemyInteraction(enemy);
+        if(!enemy.isDead())
+            updateEnemyInteraction(enemy);
+            
         updateEnemyMovement(enemy);
+    }
+}
+
+void Play::updateElements(){
+    for(int i = 0; i < elements.size(); i++){
+        Entity *currentEl = &elements.at(i);
+
+        if(currentEl->getAnimatedOnce()){
+            Texture2D *texture = currentEl->getSprite();
+
+            elements.erase(elements.begin() + i);
+            i--;
+        }
+    }
+
+    for(int i = 0; i < bloodElements.size(); i++){
+        if(bloodElements.at(i).getAnimatedOnce())
+            bloodElements.at(i).setCurrentDirection(Direction::RIGHT);
     }
 }
 
 void Play::updateUI(){
     if(player.isDashing())
-        uiElements[static_cast<int>(UI::DASH)].setCurrentDirection(Direction::TOP);
+        uiComponents[static_cast<int>(UI::DASH)].setCurrentDirection(Direction::TOP);
     else if(player.getDashCooldown() > 0.0f)
-        uiElements[static_cast<int>(UI::DASH)].setCurrentDirection(Direction::LEFT);
+        uiComponents[static_cast<int>(UI::DASH)].setCurrentDirection(Direction::LEFT);
     else
-        uiElements[static_cast<int>(UI::DASH)].setCurrentDirection(Direction::DOWN);
+        uiComponents[static_cast<int>(UI::DASH)].setCurrentDirection(Direction::DOWN);
     
     if(player.isParrying())
-        uiElements[static_cast<int>(UI::PARRY)].setCurrentDirection(Direction::TOP);
+        uiComponents[static_cast<int>(UI::PARRY)].setCurrentDirection(Direction::TOP);
     else if(player.getParryCooldown() > 0.0f)
-        uiElements[static_cast<int>(UI::PARRY)].setCurrentDirection(Direction::LEFT);
+        uiComponents[static_cast<int>(UI::PARRY)].setCurrentDirection(Direction::LEFT);
     else
-        uiElements[static_cast<int>(UI::PARRY)].setCurrentDirection(Direction::DOWN);
+        uiComponents[static_cast<int>(UI::PARRY)].setCurrentDirection(Direction::DOWN);
 
     int healthIndex = std::abs(3 - player.getHealth());
-    uiElements[static_cast<int>(UI::HEALTH)].setCurrentDirection((Direction) healthIndex);
+    uiComponents[static_cast<int>(UI::HEALTH)].setCurrentDirection((Direction) healthIndex);
 }
 
 void Play::drawEntity(Entity *entity){
@@ -286,19 +337,22 @@ void Play::drawEntity(Entity *entity){
 }
 
 void Play::drawEnemies(){
-    std::vector<Character*> entities;
+    std::vector<Entity*> entities;
     entities.clear();
 
-    for(Character &enemy : enemies)
+    for(Entity &enemy : enemies)
         entities.push_back(&enemy);
 
+    for(Entity &element : elements)
+        entities.push_back(&element);
+
     std::sort(entities.begin(), entities.end(),
-        [](const Character* a, const Character* b) {
+        [](const Entity* a, const Entity* b) {
             return a->getCoords().y < b->getCoords().y;
         }
     );
 
-    for(Character *&charac : entities){
+    for(Entity *&charac : entities){
         drawEntity(charac);
     }
 }
@@ -321,13 +375,18 @@ void Play::drawBackground(){
     );
 }
 
+void Play::drawBlood(){
+    for(Entity &blood : bloodElements)
+        drawEntity(&blood);
+}
+
 void Play::drawUI(){
-    for(int i = 0; i < sizeof(uiElements) / sizeof(uiElements[0]); i++){
-        Vector2 coords = uiElements[i].getCoords();
+    for(int i = 0; i < sizeof(uiComponents) / sizeof(uiComponents[0]); i++){
+        Vector2 coords = uiComponents[i].getCoords();
         DrawTexturePro(
-            *uiElements[i].getSprite(),
-            uiElements[i].getSpriteSource(),
-            { coords.x, coords.y, uiElements[i].getWidth(), uiElements[i].getHeight() },
+            *uiComponents[i].getSprite(),
+            uiComponents[i].getSpriteSource(),
+            { coords.x, coords.y, uiComponents[i].getWidth(), uiComponents[i].getHeight() },
             { 0.0f, 0.0f },
             0.0f,
             WHITE
@@ -339,6 +398,8 @@ void Play::drawUI(){
 
     DrawText("KILLS", 20.0f, (ENTITY_HEIGHT * 2) + 20.0f, 30, WHITE);
     DrawText(TextFormat("%d", kills), 45.0f, (ENTITY_HEIGHT * 2) + 55.0f, 50, WHITE);
+
+    DrawText(TextFormat("fps: %d", GetFPS()), 45.0f, (ENTITY_HEIGHT * 3) + 55.0f, 50, WHITE);
 }
 
 void Play::restartGame(){
@@ -348,9 +409,13 @@ void Play::restartGame(){
     waveBreakTimer = 0.0f;
     enemySpawnTimer = 0.0f;
     enemies.clear();
+    elements.clear();
+    bloodElements.clear();
 
     player.setHealth(TAKARA_HEALTH);
     player.setCoords({ (float) GetRenderWidth() / 2, (float) GetRenderHeight() / 2 });
+
+    switchPage = PageType::COUNT;
 }
 
 // Public
@@ -361,6 +426,7 @@ void Play::update(){
     manageWave();
     updateEnemies();
 
+    updateElements();
     updateUI();
 }
 
@@ -368,6 +434,8 @@ void Play::draw(){
     ClearBackground(RAYWHITE);
 
     drawBackground();
+
+    drawBlood();
 
     if(player.isDead())
         drawEntity(&player);
@@ -378,6 +446,10 @@ void Play::draw(){
         drawEntity(&player);
 
     drawUI();
+}
+
+void Play::resetPage(){
+    restartGame();
 }
 
 void Play::setAudioEngine(Audio *audioEngine){ 

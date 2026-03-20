@@ -1,10 +1,13 @@
 #include "Visual.h"
 
 Visual::Visual()
-    : takaraSprites(), background(), uiSprites() {}
+    : takaraSprites(), background(), elementSprites(), uiSprites() {}
 
 Visual::~Visual(){
     for(Texture2D &texture : takaraSprites)
+        UnloadTexture(texture);
+
+    for(Texture2D &texture: elementSprites)
         UnloadTexture(texture);
 
     for(Texture2D &texture : uiSprites)
@@ -22,6 +25,12 @@ void Visual::initTakaraTextures(){
     takaraSprites[static_cast<int>(Action::PARRY)] = LoadTexture(TAKARA_PARRY);
     takaraSprites[static_cast<int>(Action::STUN)] = LoadTexture(TAKARA_STUN);
     takaraSprites[static_cast<int>(Action::DEAD)] = LoadTexture(TAKARA_DEAD);
+}
+
+void Visual::initElementTextures(){
+    elementSprites[static_cast<int>(Elements::BLOOD)] = LoadTexture(ELEMENT_BLOOD);
+    elementSprites[static_cast<int>(Elements::SMOKE)] = LoadTexture(ELEMENT_SMOKE);
+    elementSprites[static_cast<int>(Elements::SPARK)] = LoadTexture(ELEMENT_SPARK);
 }
 
 void Visual::initUiTextures(){
@@ -44,6 +53,7 @@ void Visual::initBackground(){
 
 void Visual::initTextures(){
     initTakaraTextures();
+    initElementTextures();
     initUiTextures();
     initBackground();
 }
@@ -53,6 +63,13 @@ Texture2D *Visual::getTakaraSprite(int index){
         return nullptr;
 
     return &takaraSprites[index];
+}
+
+Texture2D *Visual::getElementSprite(int index){
+    if(!(index >= 0 && index <= static_cast<int>(Elements::COUNT)))
+        return nullptr;
+
+    return &elementSprites[index];
 }
 
 Texture2D *Visual::getBackground(){

@@ -1,5 +1,8 @@
 #pragma once
 #include "raylib.h"
+#include "./engine/Enums.h"
+#include "./engine/Audio.h"
+#include "./engine/Visual.h"
 #include "./pages/Page.h"
 #include "./pages/HomePage.h"
 #include "./pages/PlayPage.h"
@@ -10,7 +13,7 @@ private:
     static constexpr const float WINDOW_HEIGHT = 720.0f;
     static constexpr const char *WINDOW_NAME = "Takara's Blade";
 
-    Page *pages[2];
+    Page *pages[static_cast<int>(PageType::COUNT)];
     Page *currentPage;
 
     Audio audioEngine;
@@ -18,9 +21,9 @@ private:
 
 public:
     GameEngine();
-
     ~GameEngine();
 
     void gameLoop();
 
+    void openPage(PageType page);
 };

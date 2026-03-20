@@ -1,11 +1,13 @@
 #pragma once
 #include "Page.h"
-#include "../entities/Character.h"
-#include "../engine/Enums.h"
+#include "raylib.h"
 #include <vector>
 #include <unordered_map>
 #include <cmath>
 #include <algorithm>
+#include "../entities/Character.h"
+#include "../engine/Enums.h"
+#include "../GameEngine.h"
 
 class Play : public Page{
 private:
@@ -32,7 +34,9 @@ private:
 
     Character player;
     std::vector<Character> enemies;
-    Entity uiElements[static_cast<int>(UI::COUNT)];
+    std::vector<Entity> elements;
+    std::vector<Entity> bloodElements;
+    Entity uiComponents[static_cast<int>(UI::COUNT)];
 
     int wave = 0;
     int kills = 0;
@@ -45,14 +49,18 @@ private:
     void handleInput() override;
     bool dashInteraction(Character *charac1, Character *charac2);
 
+    void addElement(Vector2 coords, Elements elementType);
+
     void updateEnemyInteraction(Character &enemy);
     void updateEnemyMovement(Character &enemy);
     void updateEnemies();
+    void updateElements();
     void updateUI();
 
     void drawEntity(Entity *entity);
     void drawEnemies();
     void drawBackground();
+    void drawBlood();
     void drawUI();
 
     bool collisionDetection(Entity *object1, Entity *object2);
@@ -61,8 +69,8 @@ private:
     bool areEnemiesDead();
     void spawnEnemyWave();
     void manageWave();
-    
     void restartGame();
+
 public:
     Play();
     Play(Audio *audioEngine, Visual *visualEngine);
@@ -70,8 +78,8 @@ public:
 
     void update() override;
     void draw() override;
+    void resetPage() override;
 
     void setAudioEngine(Audio *audioEngine) override;
     void setVisualEngine(Visual *visualEngine) override;
-
 };

@@ -10,15 +10,20 @@ Home::~Home(){
 }
 
 void Home::update(){
-
+    handleInput();
 }
 
 void Home::draw(){
+    ClearBackground(RAYWHITE);
+}
 
+void Home::resetPage(){
+    switchPage = PageType::COUNT;
 }
 
 void Home::handleInput(){
-    
+    if(IsKeyReleased(KEY_P))
+        switchPage = PageType::PLAY;
 }
 
 void Home::setAudioEngine(Audio *audioEngine){ 
