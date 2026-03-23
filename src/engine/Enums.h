@@ -31,11 +31,20 @@ enum class UI{
     HEALTH,
     DASH,
     PARRY,
+    BUTTON,
     COUNT
 };
 
 enum class PageType{
     HOME,
     PLAY,
+    COUNT
+};
+
+enum class ActionSounds{
+    RUN,
+    DASH,
+    PARRY,
+    DEAD,
     COUNT
 };

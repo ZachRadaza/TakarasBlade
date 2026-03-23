@@ -16,6 +16,7 @@ GameEngine::GameEngine()
     InitAudioDevice();
 
     visualEngine.initTextures();
+    audioEngine.initAudios();
 
     pages[static_cast<int>(PageType::HOME)] = new Home();
 
@@ -26,7 +27,7 @@ GameEngine::GameEngine()
         pages[i]->setVisualEngine(&visualEngine);
     }
 
-    currentPage = pages[static_cast<int>(PageType::PLAY)];
+    currentPage = pages[static_cast<int>(PageType::HOME)];
 }
 
 GameEngine::~GameEngine(){

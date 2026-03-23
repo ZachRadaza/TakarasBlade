@@ -1,10 +1,13 @@
 #include "Visual.h"
 
 Visual::Visual()
-    : takaraSprites(), background(), elementSprites(), uiSprites() {}
+    : takaraSprites(), enemySprites(), background(), elementSprites(), uiSprites() {}
 
 Visual::~Visual(){
     for(Texture2D &texture : takaraSprites)
+        UnloadTexture(texture);
+
+    for(Texture2D &texture : enemySprites)
         UnloadTexture(texture);
 
     for(Texture2D &texture: elementSprites)
@@ -13,7 +16,8 @@ Visual::~Visual(){
     for(Texture2D &texture : uiSprites)
         UnloadTexture(texture);
     
-    UnloadTexture(background);
+    for(Texture2D &texture : background)
+        UnloadTexture(texture);
 }
 
 // private
@@ -25,6 +29,15 @@ void Visual::initTakaraTextures(){
     takaraSprites[static_cast<int>(Action::PARRY)] = LoadTexture(TAKARA_PARRY);
     takaraSprites[static_cast<int>(Action::STUN)] = LoadTexture(TAKARA_STUN);
     takaraSprites[static_cast<int>(Action::DEAD)] = LoadTexture(TAKARA_DEAD);
+}
+
+void Visual::initEnemyTextures(){
+    enemySprites[static_cast<int>(Action::STANCE)] = LoadTexture(ENEMY_STANCE);
+    enemySprites[static_cast<int>(Action::RUN)] = LoadTexture(ENEMY_RUN);
+    enemySprites[static_cast<int>(Action::DASH)] = LoadTexture(ENEMY_DASH);
+    enemySprites[static_cast<int>(Action::PARRY)] = LoadTexture(ENEMY_PARRY);
+    enemySprites[static_cast<int>(Action::STUN)] = LoadTexture(ENEMY_STUN);
+    enemySprites[static_cast<int>(Action::DEAD)] = LoadTexture(ENEMY_DEAD);
 }
 
 void Visual::initElementTextures(){
@@ -40,45 +53,45 @@ void Visual::initUiTextures(){
     uiSprites[static_cast<int>(UI::DASH)] = LoadTexture(UI_DASH);
     uiSprites[static_cast<int>(UI::PARRY)] = LoadTexture(UI_PARRY);
     uiSprites[static_cast<int>(UI::PAUSE)] = LoadTexture(UI_PAUSE);
+    uiSprites[static_cast<int>(UI::BUTTON)] = LoadTexture(UI_BUTTON);
 }
 
 void Visual::initBackground(){
-    background = LoadTexture(GRASS);
+    background[static_cast<int>(PageType::HOME)] = LoadTexture(GRASS_DETAILED);
+    background[static_cast<int>(PageType::PLAY)] = LoadTexture(GRASS);
 
-    SetTextureFilter(background, TEXTURE_FILTER_POINT);
-    SetTextureWrap(background, TEXTURE_WRAP_REPEAT);
+    for(Texture2D &texture : background){
+        SetTextureFilter(texture, TEXTURE_FILTER_POINT);
+        SetTextureWrap(texture, TEXTURE_WRAP_REPEAT);
+    }
 }
 
 // public
 
 void Visual::initTextures(){
     initTakaraTextures();
+    initEnemyTextures();
     initElementTextures();
     initUiTextures();
     initBackground();
 }
 
-Texture2D *Visual::getTakaraSprite(int index){
-    if(!(index >= 0 && index <= static_cast<int>(Action::COUNT)))
-        return nullptr;
-
-    return &takaraSprites[index];
+Texture2D *Visual::getTakaraSprite(Action index){
+    return &takaraSprites[static_cast<int>(index)];
 }
 
-Texture2D *Visual::getElementSprite(int index){
-    if(!(index >= 0 && index <= static_cast<int>(Elements::COUNT)))
-        return nullptr;
-
-    return &elementSprites[index];
+Texture2D *Visual::getEnemySprite(Action index){
+    return &enemySprites[static_cast<int>(index)];
 }
 
-Texture2D *Visual::getBackground(){
-    return &background;
+Texture2D *Visual::getElementSprite(Elements index){
+    return &elementSprites[static_cast<int>(index)];
 }
 
-Texture2D *Visual::getUISprite(int index){
-    if(!(index >= 0 && index <= static_cast<int>(UI::COUNT)))
-        return nullptr;
+Texture2D *Visual::getBackground(PageType index){
+    return &background[static_cast<int>(index)];
+}
 
-    return &uiSprites[index];
+Texture2D *Visual::getUISprite(UI index){
+    return &uiSprites[static_cast<int>(index)];
 }

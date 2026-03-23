@@ -36,6 +36,7 @@ public:
     virtual Rectangle getSpriteSource();
     const Direction getCurrentDirection();
     const bool getAnimatedOnce();
+    const Rectangle getRectangle();
 
     void setCoords(Vector2 coords);
     void setWidth(float width);

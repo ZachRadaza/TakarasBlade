@@ -43,10 +43,12 @@ private:
     int enemiesToSpawn = 0;
     float waveBreakTimer = 0.0f;
     float enemySpawnTimer = 0.0f;
+    bool paused = false;
 
     void initUI();
 
     void handleInput() override;
+    void handlePlayerInput();
     bool dashInteraction(Character *charac1, Character *charac2);
 
     void addElement(Vector2 coords, Elements elementType);
@@ -56,12 +58,14 @@ private:
     void updateEnemies();
     void updateElements();
     void updateUI();
+    void updateSounds();
 
     void drawEntity(Entity *entity);
     void drawEnemies();
     void drawBackground();
     void drawBlood();
     void drawUI();
+    void drawPaused();
 
     bool collisionDetection(Entity *object1, Entity *object2);
     bool circleDetection(Character *charac1, Character *charac2);
@@ -70,6 +74,7 @@ private:
     void spawnEnemyWave();
     void manageWave();
     void restartGame();
+    void pauseGame();
 
 public:
     Play();

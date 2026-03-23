@@ -62,7 +62,7 @@ const float Entity::getMaxSpeed() const{ return this->maxSpeed; }
 
 Rectangle Entity::getSpriteSource(){
     spriteSource = { 
-        (float) (currentFrame * SPRITE_WIDTH),
+        static_cast<float>(currentFrame * SPRITE_WIDTH),
         static_cast<float>(currentDirection) * SPRITE_WIDTH,
         SPRITE_WIDTH,
         SPRITE_WIDTH
@@ -76,6 +76,15 @@ Rectangle Entity::getSpriteSource(){
 const Direction Entity::getCurrentDirection(){ return this->currentDirection; }
 
 const bool Entity::getAnimatedOnce(){ return this->animatedOnce; }
+
+const Rectangle Entity::getRectangle(){
+    return {
+        coords.x,
+        coords.y,
+        width,
+        height
+    };
+}
 
 void Entity::setCoords(Vector2 coords){ this->coords = coords; }
 
